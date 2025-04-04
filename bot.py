@@ -43,7 +43,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /help"""
     help_text = (
         "Commandes disponibles:\n"
         "/start - Du00e9marrer le bot et cru00e9er un compte\n"
@@ -60,10 +59,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text(help_text)
 
 async def wallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /wallet"""
     user_id = update.effective_user.id
     
-    # Vu00e9rifier si l'utilisateur existe
     if not db.user_exists(user_id):
         await update.message.reply_text("Veuillez d'abord utiliser /start pour créer un compte.")
         return
@@ -78,10 +75,8 @@ async def wallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.message.reply_text("Gestion de votre portefeuille:", reply_markup=reply_markup)
 
 async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /balance"""
     user_id = update.effective_user.id
     
-    # Vu00e9rifier si l'utilisateur existe
     if not db.user_exists(user_id):
         await update.message.reply_text("Veuillez d'abord utiliser /start pour créer un compte.")
         return
@@ -90,10 +85,8 @@ async def balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.message.reply_text(f"Votre solde actuel est de: {balance} CRYPTO")
 
 async def market_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /market"""
     user_id = update.effective_user.id
     
-    # Vu00e9rifier si l'utilisateur existe
     if not db.user_exists(user_id):
         await update.message.reply_text("Veuillez d'abord utiliser /start pour créer un compte.")
         return
@@ -114,10 +107,8 @@ async def market_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.message.reply_text(message, reply_markup=reply_markup)
 
 async def buy_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /buy"""
     user_id = update.effective_user.id
     
-    # Vu00e9rifier si l'utilisateur existe
     if not db.user_exists(user_id):
         await update.message.reply_text("Veuillez d'abord utiliser /start pour créer un compte.")
         return
@@ -137,10 +128,8 @@ async def buy_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await update.message.reply_text(f"Une erreur s'est produite: {str(e)}")
 
 async def sell_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /sell"""
     user_id = update.effective_user.id
     
-    # Vu00e9rifier si l'utilisateur existe
     if not db.user_exists(user_id):
         await update.message.reply_text("Veuillez d'abord utiliser /start pour créer un compte.")
         return
@@ -155,7 +144,6 @@ async def sell_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not args or len(args) < 3:
         return
     
-    # Extraction des informations de l'objet
     item_data = ' '.join(args).split(',')
     if len(item_data) < 3:
         await update.message.reply_text("Format incorrect. Utilisez: Nom, Description, Prix")
@@ -174,10 +162,8 @@ async def sell_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await update.message.reply_text(f"Une erreur s'est produite: {str(e)}")
 
 async def myitems_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /myitems"""
     user_id = update.effective_user.id
     
-    # Vu00e9rifier si l'utilisateur existe
     if not db.user_exists(user_id):
         await update.message.reply_text("Veuillez d'abord utiliser /start pour créer un compte.")
         return
@@ -195,10 +181,8 @@ async def myitems_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.message.reply_text(message)
 
 async def deposit_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Gestionnaire de la commande /deposit"""
     user_id = update.effective_user.id
     
-    # Vu00e9rifier si l'utilisateur existe
     if not db.user_exists(user_id):
         await update.message.reply_text("Veuillez d'abord utiliser /start pour créer un compte.")
         return

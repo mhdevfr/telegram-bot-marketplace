@@ -11,20 +11,15 @@ class Marketplace:
         self.logger = logging.getLogger(__name__)
     
     def create_item(self, user_id, name, description, price):
-        """Cru00e9er un nouvel objet u00e0 vendre"""
         try:
-            # Vu00e9rifier que le prix est valide
             if price <= 0:
                 return "Le prix doit u00eatre supu00e9rieur u00e0 zu00e9ro"
             
-            # Vu00e9rifier que le nom et la description sont valides
             if not name or len(name) < 3:
                 return "Le nom de l'objet doit contenir au moins 3 caractu00e8res"
             
             if not description or len(description) < 5:
                 return "La description doit contenir au moins 5 caractu00e8res"
-            
-            # Cru00e9er l'objet dans la base de donnu00e9es
             item_id = self.db.create_item(name, description, price, user_id)
             
             if item_id:
@@ -37,7 +32,6 @@ class Marketplace:
             return f"Erreur lors de la cru00e9ation de l'objet: {str(e)}"
     
     def get_available_items(self):
-        """Obtenir tous les objets disponibles u00e0 la vente"""
         try:
             items = self.db.get_available_items()
             return items
@@ -46,7 +40,6 @@ class Marketplace:
             return []
     
     def get_user_items(self, user_id):
-        """Obtenir tous les objets d'un utilisateur"""
         try:
             items = self.db.get_user_items(user_id)
             return items
@@ -55,9 +48,7 @@ class Marketplace:
             return []
     
     def buy_item(self, buyer_id, item_id):
-        """Acheter un objet"""
         try:
-            # Obtenir les informations de l'objet
             item = self.db.get_item(item_id)
             
             if not item:
@@ -66,17 +57,13 @@ class Marketplace:
             if not item['for_sale']:
                 return "Cet objet n'est plus disponible à la vente"
             
-            # Vérifié que l'acheteur n'est pas le vendeur
             if item['seller_id'] == buyer_id:
                 return "Vous ne pouvez pas acheter votre propre objet"
             
-            # Vérifier le solde de l'acheteur
             buyer_balance = self.wallet.get_balance(buyer_id)
             
             if buyer_balance < item['price']:
                 return f"Solde insuffisant. Vous avez {buyer_balance} CRYPTO, mais l'objet coûte {item['price']} CRYPTO"
-            
-            # Effectuer la transaction
             success, message = self.db.buy_item(item_id, buyer_id)
             
             if success:
@@ -89,9 +76,7 @@ class Marketplace:
             return f"Erreur lors de l'achat: {str(e)}"
     
     def cancel_sale(self, user_id, item_id):
-        """Annuler la mise en vente d'un objet"""
         try:
-            # Vérifier que l'objet existe et appartient à l'utilisateur
             item = self.db.get_item(item_id)
             
             if not item:
@@ -103,7 +88,6 @@ class Marketplace:
             if not item['for_sale']:
                 return "Cet objet n'est pas en vente"
             
-            # Mettre à jour le statut de l'objet
             self.db.cursor.execute(
                 "UPDATE items SET for_sale = 0 WHERE id = ?",
                 (item_id,)
@@ -117,9 +101,7 @@ class Marketplace:
             return f"Erreur lors de l'annulation de la vente: {str(e)}"
     
     def relist_item(self, user_id, item_id, price=None):
-        """Remettre un objet en vente"""
         try:
-            # Vérifier que l'objet existe et appartient à l'utilisateur
             item = self.db.get_item(item_id)
             
             if not item:
@@ -131,7 +113,6 @@ class Marketplace:
             if item['for_sale']:
                 return "Cet objet est déjà en vente"
             
-            # Mettre à jour le statut et éventuellement le prix de l'objet
             new_price = price if price is not None else item['price']
             
             if new_price <= 0:
@@ -150,9 +131,7 @@ class Marketplace:
             return f"Erreur lors de la remise en vente: {str(e)}"
     
     def search_items(self, query):
-        """Rechercher des objets par mot-clé"""
         try:
-            # Recherche dans le nom et la description
             self.db.cursor.execute(
                 "SELECT id, name, description, price, seller_id, for_sale "
                 "FROM items WHERE (name LIKE ? OR description LIKE ?) AND for_sale = 1",

@@ -14,12 +14,10 @@ class Database:
         self.logger = logging.getLogger(__name__)
     
     def init_db(self):
-        """Initialiser la base de données avec les tables nécessaires"""
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
             
-            # Création de la table des utilisateurs
             self.cursor.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY,
@@ -29,7 +27,6 @@ class Database:
                 )
             ''')
             
-            # Création de la table des wallets
             self.cursor.execute('''
                 CREATE TABLE IF NOT EXISTS wallets (
                     user_id INTEGER PRIMARY KEY,
@@ -40,7 +37,6 @@ class Database:
                 )
             ''')
             
-            # Création de la table des objets
             self.cursor.execute('''
                 CREATE TABLE IF NOT EXISTS items (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,12 +80,10 @@ class Database:
             raise
     
     def close(self):
-        """Fermer la connexion à la base de données"""
         if self.conn:
             self.conn.close()
     
     def user_exists(self, user_id):
-        """Vérifier si un utilisateur existe dans la base de données"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -102,7 +96,6 @@ class Database:
             return False
     
     def create_user(self, user_id, username):
-        """Créer un nouvel utilisateur"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -123,7 +116,6 @@ class Database:
             return False
     
     def update_user_activity(self, user_id):
-        """Mettre à jour la dernière activité de l'utilisateur"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -143,7 +135,6 @@ class Database:
             return False
     
     def create_wallet(self, user_id, address, private_key):
-        """Créer un nouveau wallet pour un utilisateur"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -163,7 +154,6 @@ class Database:
             return False
     
     def get_wallet(self, user_id):
-        """Obtenir les informations du wallet d'un utilisateur"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -187,7 +177,6 @@ class Database:
             return None
     
     def update_balance(self, user_id, new_balance):
-        """Mettre à jour le solde du wallet d'un utilisateur"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -207,7 +196,6 @@ class Database:
             return False
     
     def create_item(self, name, description, price, seller_id):
-        """Créer un nouvel objet à vendre"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -230,7 +218,6 @@ class Database:
             return None
     
     def get_item(self, item_id):
-        """Obtenir les informations d'un objet"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -259,7 +246,6 @@ class Database:
             return None
     
     def get_available_items(self):
-        """Obtenir tous les objets disponibles à la vente"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -286,7 +272,6 @@ class Database:
             return []
     
     def get_user_items(self, user_id):
-        """Obtenir tous les objets d'un utilisateur"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
@@ -314,13 +299,11 @@ class Database:
             return []
     
     def buy_item(self, item_id, buyer_id):
-        """Acheter un objet"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
                 self.cursor = self.conn.cursor()
             
-            # Vérifier si l'objet est disponible
             self.cursor.execute(
                 "SELECT id, price, seller_id, for_sale FROM items WHERE id = ?",
                 (item_id,)
@@ -336,7 +319,6 @@ class Database:
             item_price = result[1]
             seller_id = result[2]
             
-            # Vérifier le solde de l'acheteur
             self.cursor.execute(
                 "SELECT balance FROM wallets WHERE user_id = ?",
                 (buyer_id,)
@@ -346,14 +328,12 @@ class Database:
             if not buyer_balance or buyer_balance[0] < item_price:
                 return False, "Solde insuffisant pour acheter cet objet"
             
-            # Mettre à jour le solde de l'acheteur
             new_buyer_balance = buyer_balance[0] - item_price
             self.cursor.execute(
                 "UPDATE wallets SET balance = ? WHERE user_id = ?",
                 (new_buyer_balance, buyer_id)
             )
             
-            # Mettre à jour le solde du vendeur
             self.cursor.execute(
                 "SELECT balance FROM wallets WHERE user_id = ?",
                 (seller_id,)
@@ -365,14 +345,12 @@ class Database:
                 (new_seller_balance, seller_id)
             )
             
-            # Mettre à jour le statut de l'objet
             now = datetime.now().isoformat()
             self.cursor.execute(
                 "UPDATE items SET buyer_id = ?, for_sale = 0, sold_date = ? WHERE id = ?",
                 (buyer_id, now, item_id)
             )
             
-            # Enregistrer la transaction
             self.cursor.execute(
                 "INSERT INTO transactions (sender_id, receiver_id, amount, transaction_type, item_id, timestamp, status) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -389,7 +367,6 @@ class Database:
             return False, f"Erreur lors de l'achat: {str(e)}"
     
     def record_transaction(self, sender_id, receiver_id, amount, transaction_type, status, tx_hash=None, item_id=None):
-        """Enregistrer une transaction"""
         try:
             if not self.conn:
                 self.conn = sqlite3.connect(self.db_name)
